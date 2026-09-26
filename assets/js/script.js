@@ -1,127 +1,137 @@
-// Requirements
-let validEmail = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/; // Email regex
-const PASSWORD_VALID_CHARS = /[a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{{}}~]/;
-const PASSWORD_VALID_REGEX = new RegExp(`^[a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\\]^_\`{{}}~]{${PASSWORD_MIN_LENGTH},${PASSWORD_MAX_LENGTH}}$`);
-let validPassword = PASSWORD_VALID_REGEX; // Password regex
-let validUsername = new RegExp(`^[a-zA-Z0-9]{${USERNAME_MIN_LENGTH},${USERNAME_MAX_LENGTH}}$`); // Username regex
-// Uppercase letter requirement removed
+// LoneWalkerLee WoW Registration - client-side validation
 
-// Get the helper elements
-let usernameHelper = document.getElementById("usernameHelper"); // Username helper
-let emailHelper = document.getElementById("emailHelper"); // Email helper
-let passwordCharsHelper = document.getElementById("passwordCharsHelper"); // Password length helper
-let mustContainHelper = document.getElementById("mustContainHelper"); // Must contain uppercase letter helper
-let passwordMatchHelper = document.getElementById("passwordMatchHelper"); // Confirm password match helper
+const validEmail = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const validUsername = new RegExp(`^[a-zA-Z0-9]{${USERNAME_MIN_LENGTH},${USERNAME_MAX_LENGTH}}$`);
+const validPassword = new RegExp(
+  `^[a-zA-Z0-9!#$%&'()*+,\\-./:;<=>?@[\\]^_\`{}~]{${PASSWORD_MIN_LENGTH},${PASSWORD_MAX_LENGTH}}$`
+);
 
-// Get the input elements
-let inputUsername = document.getElementById('username');
-let inputEmail = EMAIL_ENABLED ? document.getElementById('email') : null;
-let inputPassword = document.getElementById('password');
-let inputConfirmPassword = document.getElementById('passwordRepeat');
-let submitButton = document.getElementById('submit'); // Submit button
+const usernameHelper = document.getElementById('usernameHelper');
+const emailHelper = document.getElementById('emailHelper');
+const passwordCharsHelper = document.getElementById('passwordCharsHelper');
+const passwordMatchHelper = document.getElementById('passwordMatchHelper');
 
-// Flags to check if the fields have been touched
+const inputUsername = document.getElementById('username');
+const inputEmail = EMAIL_ENABLED ? document.getElementById('email') : null;
+const inputPassword = document.getElementById('password');
+const inputConfirmPassword = document.getElementById('passwordRepeat');
+const submitButton = document.getElementById('submit');
+
 let usernameTouched = false;
 let emailTouched = false;
 let passwordTouched = false;
 let confirmPasswordTouched = false;
 
-// Function to validate the form
 function validateForm() {
-  let username = inputUsername.value;
-  let email = inputEmail ? inputEmail.value : "";
-  let password = inputPassword.value;
-  let confirmPassword = inputConfirmPassword.value;
+  if (!inputUsername || !inputPassword || !inputConfirmPassword || !submitButton) {
+    return;
+  }
 
-  let isUsernameValid = validUsername.test(username);
-  let isEmailValid = EMAIL_ENABLED ? validEmail.test(email) : true;
-  let isPasswordLengthValid = validPassword.test(password);
-  let isPasswordMatchValid = password === confirmPassword;
+  const username = inputUsername.value;
+  const email = inputEmail ? inputEmail.value : '';
+  const password = inputPassword.value;
+  const confirmPassword = inputConfirmPassword.value;
 
-  // Validate username
+  const isUsernameValid = validUsername.test(username);
+  const isEmailValid = EMAIL_ENABLED ? validEmail.test(email) && email.length <= 255 : true;
+  const isPasswordValid = validPassword.test(password);
+  const isPasswordMatchValid = password === confirmPassword && confirmPassword.length > 0;
+
   if (usernameTouched) {
-    if (!isUsernameValid) {
-      usernameHelper.classList.add("text-danger");
-      usernameHelper.innerHTML = `Username must be between ${USERNAME_MIN_LENGTH} and ${USERNAME_MAX_LENGTH} characters. Only letters and numbers are allowed!`;
-    } else {
-      usernameHelper.classList.remove("text-danger");
-      usernameHelper.innerHTML = "";
-    }
+    usernameHelper.classList.toggle('text-danger', !isUsernameValid);
+    usernameHelper.classList.toggle('text-success', isUsernameValid);
+    usernameHelper.textContent = isUsernameValid
+      ? '✓ 账号格式正确'
+      : `账号需要 ${USERNAME_MIN_LENGTH}～${USERNAME_MAX_LENGTH} 位英文字母或数字`;
   }
 
-  // Validate email
-  if (EMAIL_ENABLED && emailTouched) {
-    if (!isEmailValid) {
-      emailHelper.classList.add("text-danger");
-      emailHelper.innerHTML = "Please enter a valid email address!";
-    } else if (inputEmail.value.length > 255) {
-      emailHelper.classList.add("text-danger");
-      emailHelper.innerHTML = "Email must be at most 255 characters.";
-    } else {
-      emailHelper.classList.remove("text-danger");
-      emailHelper.innerHTML = "";
-    }
+  if (EMAIL_ENABLED && emailTouched && inputEmail) {
+    const emailValid = validEmail.test(email) && email.length <= 255;
+    emailHelper.classList.toggle('text-danger', !emailValid);
+    emailHelper.classList.toggle('text-success', emailValid);
+    emailHelper.textContent = emailValid
+      ? '✓ 邮箱格式正确'
+      : '请输入有效的邮箱地址，长度不能超过 255 个字符';
   }
 
-  // Validate password length
   if (passwordTouched) {
-    if (!isPasswordLengthValid) {
-      passwordCharsHelper.classList.add("text-danger");
-      passwordCharsHelper.classList.remove("text-success");
-      passwordCharsHelper.innerHTML = `Password must be between ${PASSWORD_MIN_LENGTH} and ${PASSWORD_MAX_LENGTH} characters. Allowed: a-z, A-Z, 0-9, and ! # $ % & ' ( ) * + , - . / : ; < = > ? @ [ ] ^ _ \` {{ }} ~`;
-    } else {
-      passwordCharsHelper.classList.remove("text-danger");
-      passwordCharsHelper.classList.add("text-success");
-      passwordCharsHelper.innerHTML = `Password: Minimum ${PASSWORD_MIN_LENGTH} character(s), maximum ${PASSWORD_MAX_LENGTH} characters. Allowed: a-z, A-Z, 0-9, and ! # $ % & ' ( ) * + , - . / : ; < = > ? @ [ ] ^ _ \` {{ }} ~`;
-    }
-
+    passwordCharsHelper.classList.toggle('text-danger', !isPasswordValid);
+    passwordCharsHelper.classList.toggle('text-success', isPasswordValid);
+    passwordCharsHelper.textContent = isPasswordValid
+      ? '✓ 密码格式正确'
+      : `密码需要 ${PASSWORD_MIN_LENGTH}～${PASSWORD_MAX_LENGTH} 位，可使用字母、数字及常用特殊字符`;
   }
 
-  // Confirm password match validation
   if (passwordTouched && confirmPasswordTouched) {
-    if (isPasswordMatchValid) {
-      passwordMatchHelper.classList.remove("text-danger");
-      passwordMatchHelper.classList.add("text-success");
-    } else {
-      passwordMatchHelper.classList.add("text-danger");
-      passwordMatchHelper.classList.remove("text-success");
-    }
+    passwordMatchHelper.classList.toggle('text-danger', !isPasswordMatchValid);
+    passwordMatchHelper.classList.toggle('text-success', isPasswordMatchValid);
+    passwordMatchHelper.textContent = isPasswordMatchValid
+      ? '✓ 两次密码一致'
+      : '两次输入的密码不一致';
   }
 
-  // Enable or disable the submit button
-  submitButton.disabled = !(isUsernameValid && isEmailValid && isPasswordLengthValid && isPasswordMatchValid);
+  submitButton.disabled = !(isUsernameValid && isEmailValid && isPasswordValid && isPasswordMatchValid);
 }
 
-// Validate username
+function setTheme(theme) {
+  const normalizedTheme = theme === 'light' ? 'light' : 'dark';
+
+  document.body.classList.toggle('dark-mode', normalizedTheme === 'dark');
+  document.body.classList.toggle('light-mode', normalizedTheme === 'light');
+
+  const toggle = document.getElementById('themeToggle');
+  if (toggle) {
+    toggle.textContent = normalizedTheme === 'dark' ? '☀' : '☾';
+    toggle.setAttribute(
+      'aria-label',
+      normalizedTheme === 'dark' ? '切换到明亮主题' : '切换到暗色主题'
+    );
+  }
+
+  localStorage.setItem('theme', normalizedTheme);
+}
+
+function getTheme() {
+  return localStorage.getItem('theme') || DEFAULT_THEME || 'dark';
+}
+
 if (inputUsername) {
-  inputUsername.addEventListener('input', function () {
+  inputUsername.addEventListener('input', () => {
     usernameTouched = true;
     validateForm();
   });
 }
 
-// Validate email
 if (inputEmail) {
-  inputEmail.addEventListener('input', function () {
+  inputEmail.addEventListener('input', () => {
     emailTouched = true;
     validateForm();
   });
 }
 
-// Validate password and confirm password
 if (inputPassword) {
-  inputPassword.addEventListener('input', function () {
+  inputPassword.addEventListener('input', () => {
     passwordTouched = true;
     validateForm();
   });
 }
 
 if (inputConfirmPassword) {
-  inputConfirmPassword.addEventListener('input', function () {
+  inputConfirmPassword.addEventListener('input', () => {
     confirmPasswordTouched = true;
     validateForm();
   });
 }
 
-// Initial validation call to set the button state correctly on page load
-validateForm();
+document.addEventListener('DOMContentLoaded', () => {
+  setTheme(getTheme());
+
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+    });
+  }
+
+  validateForm();
+});

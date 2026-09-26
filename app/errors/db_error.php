@@ -1,66 +1,86 @@
 <?php
-$message = $_GET['error_message'];
-$code = $_GET['error_code'];
+require_once __DIR__ . '/../../config.php';
 ?>
-
-<?php require_once __DIR__ . '/../../config.php'; ?>
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database error</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-  </head>
-  <body>
-    <div class="container">
-      <div class="row vh-100 align-items-center justify-content-center">
-        <div class="col-12">
-          <div class="card shadow border-white px-5 py-4 custom-card">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h1 class="mb-0">Database Error</h1>
-              <button id="themeToggle" type="button" class="btn btn-outline-secondary btn-sm">Toggle Theme</button>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07111f">
+  <title>服务暂时不可用 · LoneWalkerLee</title>
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEisjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjR0J6hW+ALEwIH"
+        crossorigin="anonymous">
+</head>
+<body class="dark-mode">
+  <main class="register-page">
+    <div class="container py-4 py-md-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+          <section class="custom-card">
+            <header class="site-header">
+              <div>
+                <div class="brand-kicker">⚔️ LONEWALKERLEE · AZEROTHCORE</div>
+                <h1>服务暂时不可用</h1>
+                <p>注册服务当前无法连接游戏数据库，请稍后再试。</p>
+              </div>
+              <button id="themeToggle" type="button" class="theme-toggle" aria-label="切换主题">☾</button>
+            </header>
+
+            <div class="ice-divider"><span>❄</span></div>
+
+            <div class="register-alert mx-4 mx-md-5 mb-4 alert" role="alert">
+              <strong>数据库连接失败</strong>
+              <p class="mb-0 mt-2">
+                这是服务器端连接问题，不是你的账号或密码问题。
+                请联系服务器管理员检查注册服务。
+              </p>
             </div>
-            <div class="card-body">
-              <h2>Error code: <?= $code ?></h2>
-              <p>Error message: <?= $message ?></p>
-              <hr class="mb-5">   
-              <a href="../../index.php" id="backBtn" class="btn">Go back</a>
+
+            <div class="px-4 px-md-5 pb-4">
+              <a href="../../index.php" class="register-button d-flex align-items-center justify-content-center text-decoration-none">
+                返回注册页面
+              </a>
             </div>
-            <small class="text-center">
-              Made with 
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
-                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
-              </svg> 
-              by <a href="https://github.com/Ferreira9006">Gabriel Ferreira</a>
-            </small>
-          </div>
+
+            <footer class="site-footer">
+              <div>❄ LoneWalkerLee · AzerothCore</div>
+              <small>艾泽拉斯正在等待你的归来。</small>
+            </footer>
+          </section>
         </div>
       </div>
     </div>
-    <script>
-      const DEFAULT_THEME = "<?= strtolower(DEFAULT_THEME) ?>";
-      function setTheme(theme) {
-        if (theme === 'dark') {
-          document.body.classList.add('dark-mode');
-          document.body.classList.remove('light-mode');
-        } else {
-          document.body.classList.add('light-mode');
-          document.body.classList.remove('dark-mode');
-        }
-        localStorage.setItem('theme', theme);
+  </main>
+
+  <script>
+    const DEFAULT_THEME = <?= json_encode(strtolower(DEFAULT_THEME), JSON_UNESCAPED_UNICODE) ?>;
+
+    function setTheme(theme) {
+      const normalized = theme === 'light' ? 'light' : 'dark';
+      document.body.classList.toggle('dark-mode', normalized === 'dark');
+      document.body.classList.toggle('light-mode', normalized === 'light');
+
+      const toggle = document.getElementById('themeToggle');
+      if (toggle) {
+        toggle.textContent = normalized === 'dark' ? '☀' : '☾';
       }
-      function getTheme() {
-        return localStorage.getItem('theme') || DEFAULT_THEME;
-      }
-      document.addEventListener('DOMContentLoaded', function() {
-        setTheme(getTheme());
-        document.getElementById('themeToggle').addEventListener('click', function() {
-          const current = getTheme();
-          setTheme(current === 'dark' ? 'light' : 'dark');
+
+      localStorage.setItem('theme', normalized);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      setTheme(localStorage.getItem('theme') || DEFAULT_THEME);
+
+      const toggle = document.getElementById('themeToggle');
+      if (toggle) {
+        toggle.addEventListener('click', function () {
+          setTheme((localStorage.getItem('theme') || DEFAULT_THEME) === 'dark' ? 'light' : 'dark');
         });
-      });
-    </script>
-  </body>
+      }
+    });
+  </script>
+</body>
 </html>
